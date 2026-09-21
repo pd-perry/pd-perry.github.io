@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Perry Dong</title>
+<meta name="description" content="Personal academic homepage of Perry Dong.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;0,700;1,400&family=Karla:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+</head>
+<body>
+
+<button id="theme-toggle" aria-label="Toggle dark mode" title="Toggle dark mode">
+  <svg id="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+  <svg id="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z"/></svg>
+</button>
+
+<div class="wrap">
+
+  <header class="hero">
+    <div class="hero-text">
+      <h1>Perry Dong <a href="blog.html" class="blog-link">Blog (coming soon)</a></h1>
+      <p class="tagline">Computer Science PhD, Stanford University</p>
+      <p class="intro">
+        I am a PhD student in the Department of Computer Science at Stanford University, advised by
+        <a href="https://ai.stanford.edu/~cbfinn/">Chelsea Finn</a> and <a href="https://dorsa.fyi/">Dorsa Sadigh</a>. I am currently also working at Google DeepMind. My research focuses on reinforcement learning. Prior to
+        Stanford, I received my B.S. and M.S. from UC Berkeley,
+        working with <a href="https://people.eecs.berkeley.edu/~svlevine/">Sergey Levine</a> and <a href="https://www.ai.hku.hk/people/academic-staff/mayi">Yi Ma</a>.
+      </p>
+
+      <nav class="links" aria-label="Contact and profile links">
+        <a href="mailto:perryd@stanford.edu">Email</a>
+        <a href="https://scholar.google.com/citations?user=3Eu7CagAAAAJ&hl=en">Google Scholar</a>
+        <a href="https://github.com/pd-perry">GitHub</a>
+        <a href="https://x.com/perryadong">X</a>
+      </nav>
+    </div>
+
+    <div class="hero-photo">
+      <img src="perrydong.jpg" alt="Profile photo" width="220" height="220">
+    </div>
+  </header>
+
+  <!-- <nav class="sections-nav" aria-label="Page sections">
+    <a href="#publications">Publications</a>
+  </nav> -->
+
+  <main>
+
+    <section id="publications">
+      <h2>Selected Publications</h2>
+
+      <article class="pub">
+        <div class="pub-thumb"><img src="figures/real-time_expo-ft.png" alt="Real-Time EXPO-FT figure"></div>
+        <div class="pub-body">
+          <h3>Real-Time EXPO-FT: Reinforcement Learning for Real-Time Vision-Language-Action Policies</h3>
+          <p class="pub-authors"><strong>P. Dong</strong>, K. Hung, D. Sadigh, C. Finn</p>
+          <p class="pub-venue">arXiv preprint arXiv:2609.18207, 2026</p>
+          <p class="pub-abstract">Presents a framework for reinforcement
+learning fine-tuning of real-time policies through decoupled slow action generation and fast, reactive editing, combining the reliability of RL with the reactiveness required for dynamic control.</p>
+          <div class="pub-links">
+            <a href="https://arxiv.org/abs/2609.18207">Paper</a> · <a href="https://pd-perry.github.io/real-time-expo-ft/">Website</a> · <a href="https://github.com/pd-perry/expo-ft">Code</a>
+          </div>
+        </div>
+      </article>
+
+      <article class="pub">
+        <div class="pub-thumb"><img src="figures/qwm.png" alt="Q-Learning With World Models figure"></div>
+        <div class="pub-body">
+          <h3>Q-Learning With World Models</h3>
+          <p class="pub-authors"><strong>P. Dong</strong>, Y. Jia, C. Finn, D. Sadigh</p>
+          <p class="pub-venue">arXiv preprint arXiv:2608.17163, 2026</p>
+          <p class="pub-abstract">Proposes QWM, an approach for test-time scaling on top of standard Q-learning by using world models to imagine action outcomes and Q-function to evaluate and select the highest value actions for inference.</p>
+          <div class="pub-links">
+            <a href="https://arxiv.org/abs/2608.17163">Paper</a> · <a href="https://pd-perry.github.io/qwm/">Website</a> · <a href="#">Code</a>          </div>
+        </div>
+      </article>
+
+      <article class="pub">
+        <div class="pub-thumb"><img src="figures/ipe.png" alt="Do You Really Need to Pretrain Q-Functions for Online RL Fine-Tuning? figure"></div>
+        <div class="pub-body">
+          <h3>Do You Really Need to Pretrain Q-Functions for Online RL Fine-Tuning?</h3>
+          <p class="pub-authors"><strong>P. Dong</strong>, R. Polonsky, D. Sadigh, C. Finn</p>
+          <p class="pub-venue">arXiv preprint arXiv:2607.27203, 2026</p>
+          <p class="pub-abstract">Shows that standard Q-function pretraining gives little benefit over random initialization, and introduces Initialization via Policy Ensemble (IPE), which bootstraps Q-learning from the pooled rollouts of several diverse pretrained policies for more effective online RL fine-tuning. </p>
+          <div class="pub-links">
+            <a href="https://arxiv.org/abs/2607.27203">Paper</a>        </div>
+        </div>
+      </article>
+
+      <article class="pub">
+        <div class="pub-thumb"><img src="figures/expo-ft.png" alt="EXPO-FT figure"></div>
+        <div class="pub-body">
+          <h3>EXPO-FT: Sample-Efficient Reinforcement Learning Finetuning for Vision-Language-Action Models</h3>
+          <p class="pub-authors"><strong>P. Dong</strong>, K. Hung, T. Gao, D. Sadigh, C. Finn</p>
+          <p class="pub-venue">arXiv preprint arXiv:2605.25477, 2026</p>
+          <p class="pub-abstract">Introduces EXPO-FT, a system for reliable, sample-efficient RL finetuning of pretrained vision-language-action models that reaches perfect task success across all evaluated manipulation tasks using an average of just 19.1 minutes of online robot data.</p>
+          <div class="pub-links">
+            <a href="https://arxiv.org/abs/2605.25477">Paper</a> · <a href="https://pd-perry.github.io/expo-ft/">Website</a> · <a href="https://github.com/pd-perry/expo-ft">Code</a>          </div>
+        </div>
+      </article>
+
+      <article class="pub">
+        <div class="pub-thumb"><img src="figures/faster.png" alt="FASTER figure"></div>
+        <div class="pub-body">
+          <h3>FASTER: Value-Guided Sampling for Fast RL</h3>
+          <p class="pub-authors"><strong>P. Dong</strong>, A. Swerdlow, D. Sadigh, C. Finn</p>
+          <p class="pub-venue">arXiv preprint arXiv:2604.19730, 2026</p>
+          <p class="pub-abstract">Presents FASTER, which models action-candidate denoising as an MDP and learns a value function in denoising space to filter candidates, recovering the benefits of test-time sampling in RL without its computational overhead.</p>
+          <div class="pub-links">
+            <a href="https://arxiv.org/abs/2604.19730">Paper</a> · <a href="https://pd-perry.github.io/faster/">Website</a> · <a href="https://github.com/alexanderswerdlow/faster">Code</a>          </div>
+        </div>
+      </article>
+
+      <article class="pub">
+        <div class="pub-thumb"><img src="figures/value_flows.jpg" alt="Value Flows figure"></div>
+        <div class="pub-body">
+          <h3>Value Flows</h3>
+          <p class="pub-authors"><strong>P. Dong</strong>, C. Zheng, C. Finn, D. Sadigh, B. Eysenbach</p>
+          <p class="pub-venue">International Conference on Learning Representations (ICLR), 2026</p>
+          <p class="pub-abstract">Uses flow matching to model the full continuous distribution over future returns in distributional RL, avoiding the discretization into bins or fixed quantiles required by prior categorical or quantile-based approaches.</p>
+          <div class="pub-links">
+            <a href="https://arxiv.org/abs/2510.07650">Paper</a> · <a href="https://pd-perry.github.io/value-flows">Website</a> · <a href="https://github.com/chongyi-zheng/value-flows">Code</a>          </div>
+        </div>
+      </article>
+
+      <article class="pub">
+        <div class="pub-thumb"><img src="figures/expo.png" alt="EXPO figure"></div>
+        <div class="pub-body">
+          <h3>EXPO: Stable Reinforcement Learning with Expressive Policies</h3>
+          <p class="pub-authors"><strong>P. Dong</strong>, Q. Li, D. Sadigh, C. Finn</p>
+          <p class="pub-venue">International Conference on Learning Representations (ICLR), 2026</p>
+          <p class="pub-abstract">EXPO is a highly sample-efficient online RL algorithm for expressive policies that pairs a large expressive base policy trained via a stable imitation objective with a lightweight edit policy that shifts sampled actions toward higher-value regions for stable value maximization.</p>
+          <div class="pub-links">
+            <a href="https://arxiv.org/abs/2507.07986">Paper</a> · <a href="https://github.com/pd-perry/EXPO">Code</a>          </div>
+        </div>
+      </article>
+
+      <article class="pub">
+        <div class="pub-thumb"><img src="figures/batch_online_rl.png" alt="What Matters for Batch Online Reinforcement Learning in Robotics? figure"></div>
+        <div class="pub-body">
+          <h3>What Matters for Batch Online Reinforcement Learning in Robotics?</h3>
+          <p class="pub-authors"><strong>P. Dong</strong>, S. Mirchandani, D. Sadigh, C. Finn</p>
+          <p class="pub-venue">International Conference on Learning Representations (ICLR), 2026</p>
+          <p class="pub-abstract">Conducts a systematic empirical study of the factors that make batch online RL — policy improvement from large batches of autonomously collected robot data — effective, addressing why prior imitation-learning-based approaches often fail to improve.</p>
+          <div class="pub-links">
+            <a href="https://arxiv.org/abs/2505.08078">Paper</a> · <a href="https://pd-perry.github.io/batch-online-rl/">Website</a>         </div>
+        </div>
+      </article>
+
+      <article class="pub">
+        <div class="pub-thumb"><img src="figures/tql.jpg" alt="TQL figure"></div>
+        <div class="pub-body">
+          <h3>TQL: Scaling Q-Functions with Transformers by Preventing Attention Collapse</h3>
+          <p class="pub-authors"><strong>P. Dong</strong>, K. Hung, A. Swerdlow, D. Sadigh, C. Finn</p>
+          <p class="pub-venue">arXiv preprint arXiv:2602.01439, 2026</p>
+          <p class="pub-abstract">Identifies attention-score collapse as the key failure mode preventing transformer value functions from scaling in RL, and proposes Transformer Q-Learning (TQL), which controls attention entropy to stabilize training as network size grows.</p>
+          <div class="pub-links">
+            <a href="https://arxiv.org/abs/2602.01439">Paper</a> · <a href="https://pd-perry.github.io/transformer-q-learning/">Website</a> · <a href="https://github.com/pd-perry/TQL">Code</a>          </div>
+        </div>
+      </article>
+
+      <article class="pub">
+        <div class="pub-thumb"><img src="figures/postbc.png" alt="Posterior Behavioral Cloning figure"></div>
+        <div class="pub-body">
+          <h3>Posterior Behavioral Cloning: Pretraining BC Policies for Efficient RL Finetuning</h3>
+          <p class="pub-authors">A. Wagenmaker, <strong>P. Dong</strong>, R. Tsao, C. Finn, S. Levine</p>
+          <p class="pub-venue">arXiv preprint arXiv:2512.16911, 2025</p>
+          <p class="pub-abstract">Shows that standard behavioral cloning can fail to cover the demonstrator's action distribution, and proposes Posterior Behavioral Cloning (PostBC), which models the posterior over demonstrator behavior to ensure coverage while matching BC's pretrained performance.</p>
+          <div class="pub-links">
+            <a href="https://arxiv.org/abs/2512.16911">Paper</a>         </div>
+        </div>
+      </article>
+
+      <article class="pub">
+        <div class="pub-thumb"><img src="figures/rl_implicit.png" alt="Reinforcement Learning via Implicit Imitation Guidance figure"></div>
+        <div class="pub-body">
+          <h3>Reinforcement Learning via Implicit Imitation Guidance</h3>
+          <p class="pub-authors"><strong>P. Dong</strong>, A. M. Lessing, A. S. Chen, C. Finn</p>
+          <p class="pub-venue">arXiv preprint arXiv:2506.07505, 2025</p>
+          <p class="pub-abstract">Introduces Data-Guided Noise (DGN), a sample-efficient RL method that uses prior demonstration data to guide exploration noise rather than explicitly cloning demonstrated actions, improving over prior RL-from-offline-data methods across continuous control tasks.</p>
+          <div class="pub-links">
+            <a href="https://arxiv.org/abs/2506.07505">Paper</a>         </div>
+        </div>
+      </article>
+
+
+      <article class="pub">
+        <div class="pub-thumb"><img src="figures/rlif.png" alt="RLIF figure"></div>
+        <div class="pub-body">
+          <h3>RLIF: Interactive Imitation Learning as Reinforcement Learning</h3>
+          <p class="pub-authors">J. Luo, <strong>P. Dong</strong>, Y. Zhai, Y. Ma, S. Levine</p>
+          <p class="pub-venue">International Conference on Learning Representations (ICLR), 2024</p>
+          <p class="pub-abstract">Proposes treating human intervention signals themselves as the RL reward in interactive imitation learning, in place of methods like DAgger that assume a near-optimal intervening expert, enabling policies that can surpass a suboptimal expert.</p>
+          <div class="pub-links">
+            <a href="https://arxiv.org/abs/2311.12996">Paper</a> · <a href="https://rlif-page.github.io/">Website</a> · <a href="https://github.com/pd-perry/RLIF">Code</a>          </div>
+        </div>
+      </article>
+
+
+
+    </section>
+
+  </main>
+
+  <footer>
+    <p>© 2026 Perry Dong.</p>
+  </footer>
+
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
