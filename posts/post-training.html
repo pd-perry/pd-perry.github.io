@@ -180,12 +180,20 @@
       </figure>
 
       <div class="sidenote-wrap">
-        <p>On top of that, LLM RL and robotics RL are solving different-shaped problems. RL for language models has typically been framed as generating <button type="button" class="sidenote-ref" aria-expanded="false" aria-controls="sn-one-response">one response to one prompt</button>, with a reward assigned to that response. Robotics involves generating hundreds to thousands of low-level actions or more for a single task. The reward the policy needs to learn from usually arrives only at the very end indicating task success. On top of that, environments for tasks like language or Go are deterministic and if you generate an action, that action gets played. In robotics, the environment itself can be stochastic, which means even sending the exact same command to the robot twice can produce slightly different behavior. This means the agent has to assign credit to actions taken thousands of steps earlier, across variations in the environment that compound over the horizon.</p>
+        <p>On top of that, LLM RL and robotics RL are solving different-shaped problems. RL for language models has typically been framed as generating <button type="button" class="sidenote-ref" aria-expanded="false" aria-controls="sn-one-response">one response to one prompt</button>, with a reward assigned to that response. Robotics involves generating hundreds to thousands of low-level actions or more for a single task. The reward the policy needs to learn from usually arrives only at the very end indicating task success. On top of that, environments for tasks like language or Go are deterministic, and if you generate an action, that action gets played. In robotics, the environment itself can be stochastic, which means even sending the exact same command to the robot twice can produce slightly <button type="button" class="sidenote-ref" aria-expanded="false" aria-controls="sn-stochastic">different behavior</button>. This means the agent has to assign credit to actions taken thousands of steps earlier, across variations in the environment that compound over the horizon.</p>
         <aside class="sidenote" id="sn-one-response" aria-label="Side note: one response to one prompt">
           <div class="sidenote-inner">
             <div class="sidenote-body">
               <span class="sidenote-label">On &ldquo;one response&rdquo;</span>
               <p>Though recent agentic tasks/tool use are getting quite a bit longer.</p>
+            </div>
+          </div>
+        </aside>
+        <aside class="sidenote" id="sn-stochastic" aria-label="Side note: different behavior">
+          <div class="sidenote-inner">
+            <div class="sidenote-body">
+              <span class="sidenote-label">On &ldquo;different behavior&rdquo;</span>
+              <p>Think of things like the robot not executing commands exactly, unpredictable contact such as objects slipping, noisy sensors, and external disturbances like wind or uneven ground.</p>
             </div>
           </div>
         </aside>

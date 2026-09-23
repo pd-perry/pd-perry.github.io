@@ -33,6 +33,7 @@ if (backToTop) {
 document.querySelectorAll('.sidenote-ref').forEach(ref => {
   const note = document.getElementById(ref.getAttribute('aria-controls'));
   ref.addEventListener('click', () => {
+    note.style.top = `${ref.offsetTop}px`;
     const open = note.classList.toggle('open');
     ref.setAttribute('aria-expanded', open);
   });
