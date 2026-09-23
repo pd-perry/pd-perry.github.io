@@ -30,19 +30,10 @@ if (backToTop) {
   backToTop.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
 }
 
-document.querySelectorAll('.video-row-wrap').forEach(wrap => {
-  const row = wrap.querySelector('.video-row');
-  const left = wrap.querySelector('.video-row-btn-left');
-  const right = wrap.querySelector('.video-row-btn-right');
-  const update = () => {
-    left.disabled = row.scrollLeft <= 2;
-    right.disabled = row.scrollLeft + row.clientWidth >= row.scrollWidth - 2;
-  };
-  [left, right].forEach(btn => btn.addEventListener('click', () => {
-    const dir = btn === left ? -1 : 1;
-    row.scrollBy({ left: dir * (row.querySelector('.video-card').getBoundingClientRect().width + 16), behavior: 'smooth' });
-  }));
-  row.addEventListener('scroll', update, { passive: true });
-  window.addEventListener('resize', update);
-  update();
+document.querySelectorAll('.sidenote-ref').forEach(ref => {
+  const note = document.getElementById(ref.getAttribute('aria-controls'));
+  ref.addEventListener('click', () => {
+    const open = note.classList.toggle('open');
+    ref.setAttribute('aria-expanded', open);
+  });
 });

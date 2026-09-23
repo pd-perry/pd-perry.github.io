@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Blog — Perry Dong</title>
+<meta name="description" content="Blog posts by Perry Dong, PhD student in Computer Science at Stanford University.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+</head>
+<body>
+
+<button id="theme-toggle" aria-label="Toggle dark mode" title="Toggle dark mode">
+  <svg id="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+  <svg id="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z"/></svg>
+</button>
+
+<div class="wrap">
+
+  <header class="blog-header">
+    <h1><a href="index.html">Perry Dong</a></h1>
+    <p class="tagline">Computer Science PhD, Stanford University</p>
+  </header>
+
+  <main>
+    <section id="blog">
+      <h2>Blog</h2>
+
+      <article class="post">
+        <div class="post-body">
+          <p class="post-date">September 2026</p>
+          <h3><a href="posts/post-training.html">Towards Universal Post-Training for Robotics</a></h3>
+          <p class="post-excerpt">Frontier robotics policies can now do complex tasks, but not reliably. Language modeling solved this exact problem with a post-training recipe. Robotics needs one too &mdash; here's what that recipe needs, and what our EXPO-FT algorithm does and doesn't solve.</p>
+          <div class="post-meta-authors post-card-authors">
+            <a class="post-meta-author" href="index.html">
+              <img src="perrydong.jpg" alt="Perry Dong" class="post-meta-avatar">
+              <span class="post-meta-name">Perry Dong</span>
+            </a>
+            <a class="post-meta-author" href="https://ai.stanford.edu/~cbfinn/" target="_blank" rel="noopener">
+              <img src="figures/blog/post_training/chelsea_finn.jpg" alt="Chelsea Finn" class="post-meta-avatar">
+              <span class="post-meta-name">Chelsea Finn</span>
+            </a>
+          </div>
+        </div>
+      </article>
+
+      <article class="post">
+        <div class="post-body">
+          <p class="post-date">September 2026</p>
+          <h3><a href="posts/expo-tuning.html">EXPO Hyperparameter Tuning Guide</a></h3>
+          <p class="post-excerpt">Practical defaults for tuning EXPO, EXPO-FT, and Real-Time EXPO-FT &mdash; edit action scale, number of action samples, prior quality, and what to check when the robot is jittery.</p>
+          <div class="post-meta-authors post-card-authors">
+            <a class="post-meta-author" href="index.html">
+              <img src="perrydong.jpg" alt="Perry Dong" class="post-meta-avatar">
+              <span class="post-meta-name">Perry Dong</span>
+            </a>
+          </div>
+        </div>
+      </article>
+    </section>
+  </main>
+
+  <footer>
+    <p>© 2026 Perry Dong.</p>
+  </footer>
+
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>

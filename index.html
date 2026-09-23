@@ -7,7 +7,7 @@
 <meta name="description" content="Personal academic homepage of Perry Dong.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;0,700;1,400&family=Karla:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
 </head>
@@ -22,7 +22,7 @@
 
   <header class="hero">
     <div class="hero-text">
-      <h1>Perry Dong <a href="blog.html" class="blog-link">Blog (coming soon)</a></h1>
+      <h1>Perry Dong <a href="blog.html" class="blog-link">Blog</a></h1>
       <p class="tagline">Computer Science PhD, Stanford University</p>
       <p class="intro">
         I am a PhD student in the Department of Computer Science at Stanford University, advised by
@@ -62,7 +62,7 @@
           <p class="pub-abstract">Presents a framework for reinforcement
 learning fine-tuning of real-time policies through decoupled slow action generation and fast, reactive editing, combining the reliability of RL with the reactiveness required for dynamic control.</p>
           <div class="pub-links">
-            <a href="https://arxiv.org/abs/2609.18207">Paper</a> · <a href="https://pd-perry.github.io/real-time-expo-ft/">Website</a> · <a href="https://github.com/pd-perry/expo-ft">Code</a>
+            <a href="https://arxiv.org/abs/2609.18207">Paper</a> <span class="pub-sep">|</span> <a href="https://pd-perry.github.io/real-time-expo-ft/">Website</a> <span class="pub-sep">|</span> <a href="https://github.com/pd-perry/expo-ft">Code</a>
           </div>
         </div>
       </article>
@@ -75,7 +75,7 @@ learning fine-tuning of real-time policies through decoupled slow action generat
           <p class="pub-venue">arXiv preprint arXiv:2608.17163, 2026</p>
           <p class="pub-abstract">Proposes QWM, an approach for test-time scaling on top of standard Q-learning by using world models to imagine action outcomes and Q-function to evaluate and select the highest value actions for inference.</p>
           <div class="pub-links">
-            <a href="https://arxiv.org/abs/2608.17163">Paper</a> · <a href="https://pd-perry.github.io/qwm/">Website</a> · <a href="#">Code</a>          </div>
+            <a href="https://arxiv.org/abs/2608.17163">Paper</a> <span class="pub-sep">|</span> <a href="https://pd-perry.github.io/qwm/">Website</a> <span class="pub-sep">|</span> <a href="#">Code</a>          </div>
         </div>
       </article>
 
@@ -99,7 +99,7 @@ learning fine-tuning of real-time policies through decoupled slow action generat
           <p class="pub-venue">Conference on Robot Learning (CoRL), 2026</p>
           <p class="pub-abstract">Introduces EXPO-FT, a system for reliable, sample-efficient RL finetuning of pretrained vision-language-action models that reaches perfect task success across all evaluated manipulation tasks using an average of just 19.1 minutes of online robot data.</p>
           <div class="pub-links">
-            <a href="https://arxiv.org/abs/2605.25477">Paper</a> · <a href="https://pd-perry.github.io/expo-ft/">Website</a> · <a href="https://github.com/pd-perry/expo-ft">Code</a>          </div>
+            <a href="https://arxiv.org/abs/2605.25477">Paper</a> <span class="pub-sep">|</span> <a href="https://pd-perry.github.io/expo-ft/">Website</a> <span class="pub-sep">|</span> <a href="https://github.com/pd-perry/expo-ft">Code</a>          </div>
         </div>
       </article>
 
@@ -111,7 +111,7 @@ learning fine-tuning of real-time policies through decoupled slow action generat
           <p class="pub-venue">arXiv preprint arXiv:2604.19730, 2026</p>
           <p class="pub-abstract">Presents FASTER, which models action-candidate denoising as an MDP and learns a value function in denoising space to filter candidates, recovering the benefits of test-time sampling in RL without its computational overhead.</p>
           <div class="pub-links">
-            <a href="https://arxiv.org/abs/2604.19730">Paper</a> · <a href="https://pd-perry.github.io/faster/">Website</a> · <a href="https://github.com/alexanderswerdlow/faster">Code</a>          </div>
+            <a href="https://arxiv.org/abs/2604.19730">Paper</a> <span class="pub-sep">|</span> <a href="https://pd-perry.github.io/faster/">Website</a> <span class="pub-sep">|</span> <a href="https://github.com/alexanderswerdlow/faster">Code</a>          </div>
         </div>
       </article>
 
@@ -123,7 +123,7 @@ learning fine-tuning of real-time policies through decoupled slow action generat
           <p class="pub-venue">International Conference on Learning Representations (ICLR), 2026</p>
           <p class="pub-abstract">Uses flow matching to model the full continuous distribution over future returns in distributional RL, avoiding the discretization into bins or fixed quantiles required by prior categorical or quantile-based approaches.</p>
           <div class="pub-links">
-            <a href="https://arxiv.org/abs/2510.07650">Paper</a> · <a href="https://pd-perry.github.io/value-flows">Website</a> · <a href="https://github.com/chongyi-zheng/value-flows">Code</a>          </div>
+            <a href="https://arxiv.org/abs/2510.07650">Paper</a> <span class="pub-sep">|</span> <a href="https://pd-perry.github.io/value-flows">Website</a> <span class="pub-sep">|</span> <a href="https://github.com/chongyi-zheng/value-flows">Code</a>          </div>
         </div>
       </article>
 
@@ -135,7 +135,7 @@ learning fine-tuning of real-time policies through decoupled slow action generat
           <p class="pub-venue">International Conference on Learning Representations (ICLR), 2026</p>
           <p class="pub-abstract">EXPO is a highly sample-efficient online RL algorithm for expressive policies that pairs a large expressive base policy trained via a stable imitation objective with a lightweight edit policy that shifts sampled actions toward higher-value regions for stable value maximization.</p>
           <div class="pub-links">
-            <a href="https://arxiv.org/abs/2507.07986">Paper</a> · <a href="https://github.com/pd-perry/EXPO">Code</a>          </div>
+            <a href="https://arxiv.org/abs/2507.07986">Paper</a> <span class="pub-sep">|</span> <a href="https://github.com/pd-perry/EXPO">Code</a>          </div>
         </div>
       </article>
 
@@ -147,7 +147,7 @@ learning fine-tuning of real-time policies through decoupled slow action generat
           <p class="pub-venue">International Conference on Learning Representations (ICLR), 2026</p>
           <p class="pub-abstract">Conducts a systematic empirical study of the factors that make batch online RL — policy improvement from large batches of autonomously collected robot data — effective, addressing why prior imitation-learning-based approaches often fail to improve.</p>
           <div class="pub-links">
-            <a href="https://arxiv.org/abs/2505.08078">Paper</a> · <a href="https://pd-perry.github.io/batch-online-rl/">Website</a>         </div>
+            <a href="https://arxiv.org/abs/2505.08078">Paper</a> <span class="pub-sep">|</span> <a href="https://pd-perry.github.io/batch-online-rl/">Website</a>         </div>
         </div>
       </article>
 
@@ -159,7 +159,7 @@ learning fine-tuning of real-time policies through decoupled slow action generat
           <p class="pub-venue">International Conference on Machine Learning (ICML), 2026</p>
           <p class="pub-abstract">Identifies attention-score collapse as the key failure mode preventing transformer value functions from scaling in RL, and proposes Transformer Q-Learning (TQL), which controls attention entropy to stabilize training as network size grows.</p>
           <div class="pub-links">
-            <a href="https://arxiv.org/abs/2602.01439">Paper</a> · <a href="https://pd-perry.github.io/transformer-q-learning/">Website</a> · <a href="https://github.com/pd-perry/TQL">Code</a>          </div>
+            <a href="https://arxiv.org/abs/2602.01439">Paper</a> <span class="pub-sep">|</span> <a href="https://pd-perry.github.io/transformer-q-learning/">Website</a> <span class="pub-sep">|</span> <a href="https://github.com/pd-perry/TQL">Code</a>          </div>
         </div>
       </article>
 
@@ -196,7 +196,7 @@ learning fine-tuning of real-time policies through decoupled slow action generat
           <p class="pub-venue">International Conference on Learning Representations (ICLR), 2024</p>
           <p class="pub-abstract">Proposes treating human intervention signals themselves as the RL reward in interactive imitation learning, in place of methods like DAgger that assume a near-optimal intervening expert, enabling policies that can surpass a suboptimal expert.</p>
           <div class="pub-links">
-            <a href="https://arxiv.org/abs/2311.12996">Paper</a> · <a href="https://rlif-page.github.io/">Website</a> · <a href="https://github.com/pd-perry/RLIF">Code</a>          </div>
+            <a href="https://arxiv.org/abs/2311.12996">Paper</a> <span class="pub-sep">|</span> <a href="https://rlif-page.github.io/">Website</a> <span class="pub-sep">|</span> <a href="https://github.com/pd-perry/RLIF">Code</a>          </div>
         </div>
       </article>
 
