@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Towards Universal Post-Training for Robotics — Perry Dong</title>
+<meta name="description" content="Why robotics RL is a different problem than LLM RL, what EXPO-FT gets right and wrong, and what a universal post-training recipe for robotics needs. By Perry Dong, PhD student in Computer Science at Stanford University.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../style.css">
+<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+</head>
+<body>
+
+<div class="reading-progress" id="reading-progress"></div>
+
+<button id="theme-toggle" aria-label="Toggle dark mode" title="Toggle dark mode">
+  <svg id="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+  <svg id="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z"/></svg>
+</button>
+
+<button id="back-to-top" aria-label="Back to top" title="Back to top">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+</button>
+
+<div class="wrap">
+
+  <main>
+    <article class="post-page">
+      <a href="../blog.html" class="back-link">&larr; Back to blog</a>
+      <h1 class="post-title">Towards Universal Post-Training for Robotics</h1>
+
+      <div class="post-meta">
+        <div class="post-meta-authors">
+          <a class="post-meta-author" href="../index.html">
+            <img src="../perrydong.jpg" alt="Perry Dong" class="post-meta-avatar">
+            <span class="post-meta-name">Perry Dong</span>
+          </a>
+          <a class="post-meta-author" href="https://ai.stanford.edu/~cbfinn/" target="_blank" rel="noopener">
+            <img src="../figures/blog/post_training/chelsea_finn.jpg" alt="Chelsea Finn" class="post-meta-avatar">
+            <span class="post-meta-name">Chelsea Finn</span>
+          </a>
+        </div>
+        <p class="post-date">September 2026 <span class="post-readtime">13 min read</span></p>
+      </div>
+
+      <nav class="post-toc" aria-label="Table of contents">
+        <p class="post-toc-title">In this post</p>
+        <ol>
+          <li><a href="#scalable-reliability">Scalable reliability</a></li>
+          <li><a href="#seen-before">We have seen this play out before</a></li>
+          <li><a href="#two-things">Two things a recipe needs</a></li>
+          <li><a href="#different-rl-problem">Why is robotics a different RL problem than LLMs?</a></li>
+          <li><a href="#value-based-rl">Why can we not use existing value-based RL approaches?</a></li>
+          <li><a href="#algorithm">What might an algorithm for robotics RL look like?</a></li>
+          <li><a href="#protocols">Standard training protocols</a></li>
+          <li><a href="#towards-universal">Towards universal post-training</a></li>
+        </ol>
+      </nav>
+
+      <p id="scalable-reliability">People have been imagining robots working alongside humans since the dawn of storytelling. In 2026, that vision feels closer than ever. Physical Intelligence, Generalist, DeepMind, and other leading players have all shown pretrained models capable of genuinely complex tasks, to the point where the development of frontier robotics models looks a lot like that of language models in the GPT-2 days.</p>
+
+      <p>But complex behavior does not equal reliability. A robot that loads dishes correctly 95% of the time will break something every week in a home full of glass, pets, and kids. A pretrained generalist policy cannot be deployed autonomously to do household chores, or put to work in a factory, until its reliability sits much further out along the nines.</p>
+
+      <h2 id="seen-before">We have seen this play out before</h2>
+
+      <p>In the early days of language modeling we had exactly this problem. A big pretrained model like GPT-2 or GPT-3 was fluent, knowledgeable, and completely unreliable. If you ask GPT-2 &ldquo;How do I roast a whole chicken?&rdquo;, you might get something like:</p>
+
+      <blockquote>
+        <p>I roast a whole chicken in a pot. I roast a whole chicken in a pot with a lid on it. I roast a whole chicken in a pot with a lid on it.</p>
+        <p>If you're not sure what a pot is, ask your butcher. Sometimes, when I roast meat, I roast it in a pot, which is more like a refrigerator or freezer, and I roast it in a pot that is a small freezer, or a big freezer, or larger freezer.</p>
+        <p>Why do I have to be afraid of chickens?</p>
+        <p>Because they're so adorable.</p>
+        <p><cite>&mdash; GPT-2</cite></p>
+      </blockquote>
+
+      <p>Sometimes it answers the question. Sometimes it continues your question with three more questions. Sometimes it drifts into a Reddit thread it had hallucinated. While it could make for an interesting conversation, it's not something that can be deployed.</p>
+
+      <p>Luckily, we know exactly how this problem was solved: post-training, specifically, supervised instruction tuning, RL from human feedback, and RL with verifiable rewards, which turned &ldquo;impressive demos&rdquo; into &ldquo;things you can actually use.&rdquo;</p>
+
+      <div class="sidenote-wrap">
+        <p>The more important part is that the field converged on a shared <button type="button" class="sidenote-ref" aria-expanded="false" aria-controls="sn-recipe">recipe</button> for post-training language models:</p>
+        <aside class="sidenote" id="sn-recipe" aria-label="Side note: recipe">
+          <div class="sidenote-inner">
+            <div class="sidenote-body">
+              <span class="sidenote-label">On &ldquo;recipe&rdquo;</span>
+              <p>Think of it like a plug-and-play playbook that allows you to improve different models through post-training.</p>
+            </div>
+          </div>
+        </aside>
+      </div>
+
+      <ol>
+        <li>Start from a strong pretrained model.</li>
+        <li>Define the environments and reward, i.e. verifiable or learned preference models.</li>
+        <li>Run RL optimization with a specific family of algorithms, anchored to the reference model.</li>
+        <li>Watch for and address known pathologies such as reward hacking.</li>
+      </ol>
+
+      <p>With this concrete recipe, anyone who wants to fine-tune the latest LLM on a downstream task has a concrete path to follow, with documented failure modes and sane defaults at every step. That is what makes LLM post-training tractable at scale.</p>
+
+      <p>Robotics is sitting almost exactly where language modeling was: The pretraining has scaled beautifully. We already have very good pretrained policies &mdash; vision-language-action models (VLAs) and world-action models (WAMs) trained on enormous piles of data &mdash; and they execute complex behaviors. What is missing is the other half: the model learning from its own experience, and for that, we need a recipe for post-training. And for robotics, it needs to be even more reliable than language models. A bad script of code generated by an LLM gets caught by a human reviewer before it goes into production. A bad robot action doesn't wait for human review and just happens.</p>
+
+      <h2 id="why-not-yet">So why hasn't this happened yet?</h2>
+
+      <p>A lot of recent advancement in robotics has been driven by imitation learning, which inherited nearly for free everything that made supervised learning so clean and easy to use following development of techniques such as action chunking and good teleoperation interfaces. The loss doesn&rsquo;t explode for seemingly mysterious reasons; you know the few hyperparameters that are important for performance; and loss curves correlate with performance.</p>
+
+      <p>RL shows incredible promise in training frontier robotics models, but <strong>it is not yet a recipe. It's a craft.</strong></p>
+
+      <p>Getting it to work takes a lot of intuition, just like how a good chef seasons by feel. What that means in practice is that getting RL post-training to work reliably is limited to a small number of people. This was once true for LLMs, until the field converged on a shared recipe.</p>
+
+      <p>For robotics to be deployable at scale, we think it needs what language modeling has: a universal post-training recipe.</p>
+
+      <p>The remainder of this post is about closing that gap, what RL for frontier robotics models actually looks like today, why it is different from RL for language models, and what it will take to turn the craft into a recipe.</p>
+
+      <h2 id="two-things">Two things a recipe needs</h2>
+
+      <p>We think closing the gap from craft to recipe takes two things.</p>
+
+      <p>The first is <strong>an algorithm</strong> built specifically for fine-tuning frontier robotics models, one that stays stable when applied to models with billions of parameters, and that learns from a small enough amount of experience to be practical on real hardware, where every attempt costs valuable time on a real robot.</p>
+
+      <p>The second is easier to overlook, but just as important: <strong>a set of standard practices surrounding the algorithm</strong>. A default way to define what counts as success. A default way to reset the scene between attempts, so the robot can try again. A default way for a person to give feedback, and to turn that feedback into learning. The algorithm plus the protocol around it defines a set of concrete defaults for bringing frontier robotics post-training to scale.</p>
+
+      <h2 id="different-rl-problem">Why is robotics a different RL problem than LLMs?</h2>
+
+      <p>But haven&rsquo;t we already figured out large-scale RL? RL post-training has driven most of the recent gains in language models, at real scale and in production. Why would RL for robotics be any different?</p>
+
+      <p>To answer that, it helps to step back and look at where deep RL first found its footing. One of the first deep reinforcement learning systems to gain broad traction was AlphaGo, which beat Lee Sedol at Go in 2016. AlphaGo learned a policy to predict the optimal action in a given position from a massive number of repeated self-play games. This is quite similar to RL for language models, which uses a massive number of parallel text generations to see which responses get a good reward. In both cases, actions are cheap to generate and cheap to verify, which is an essential ingredient for the type of reinforcement learning that already works at scale.</p>
+
+      <figure>
+        <div class="figure-card selfplay-figure">
+          <div class="selfplay-panel">
+            <div class="selfplay-head">
+              <span class="selfplay-title">Learning through massively parallel simulation</span>
+              <span class="selfplay-subtitle">every square is a full game of Go, sampled from the current policy and scored the instant it ends</span>
+            </div>
+            <div class="selfplay-stage" role="img" aria-label="Animation of 288 Go boards playing in parallel. Stones fill each board, each finished game flashes as it is scored, and a policy-update sweep clears the boards so the next batch is played by the updated policy. One board is magnified to show the individual game.">
+              <canvas class="selfplay-base"></canvas>
+              <canvas class="selfplay-overlay"></canvas>
+            </div>
+            <div class="selfplay-stats">
+              <span class="selfplay-stat"><b data-stat="parallel">288</b> games in parallel</span>
+              <span class="selfplay-stat"><b data-stat="done">0</b> games scored</span>
+              <span class="selfplay-stat">policy <b data-stat="version">v0</b></span>
+              <span class="selfplay-legend">
+                <i class="selfplay-swatch selfplay-swatch-b"></i>black wins
+                <i class="selfplay-swatch selfplay-swatch-w"></i>white wins
+              </span>
+            </div>
+          </div>
+        </div>
+        <figcaption>On-policy RL where samples are cheap: thousands of games are generated in parallel, each one is verified by the rules of the game for free, and after every update the old games are thrown away and a fresh batch is played by the new policy.</figcaption>
+      </figure>
+
+      <p>The type of RL that has already been demonstrated at scale is on-policy policy gradient RL, which learns by hill-climbing directly on reward, and requires freshly sampled data for every update. That's fine for Go and for LLMs. Robotics is a different story because data is much more expensive to generate. A robot learning to fold laundry in the real world cannot try a thousand different actions at each low-level control step, especially when a single task chains together thousands of steps or more, and while people have explored simulations, modeling real world objects accurately in simulation can often be even harder than learning the task itself. As a result, there is a significant focus on the ability to leverage past data, for example data from many update steps ago of the policy being learned.</p>
+
+      <figure>
+        <div class="figure-card horizon-figure">
+          <div class="selfplay-panel">
+            <div class="selfplay-head">
+              <span class="selfplay-title">A simple task can take up to 500 decisions</span>
+              <span class="selfplay-subtitle">picking up a glass looks like one action, but the policy has to output 500 small commands in a row, and the only reward comes at the end</span>
+            </div>
+            <div class="selfplay-stage" role="img" aria-label="Animation of a robot arm picking up and holding a glass over 500 control steps. Each step is a dot on the gripper's path. Below it, a timeline splits the episode into reach, descend, grasp, lift and hold. The reward stays at zero for 499 steps and becomes +1 only at step 500, and then a highlight travels back across all 500 steps to show how far credit has to be assigned.">
+              <canvas></canvas>
+            </div>
+            <div class="selfplay-stats">
+              <span class="selfplay-stat"><b>500</b> control steps</span>
+              <span class="selfplay-stat"><b>7-D</b> action every 20 ms</span>
+              <span class="selfplay-stat">reward <b data-stat="reward">0</b></span>
+              <span class="selfplay-legend">
+                <i class="selfplay-swatch horizon-swatch-pos"></i>positive command
+                <i class="selfplay-swatch horizon-swatch-neg"></i>negative command
+              </span>
+            </div>
+          </div>
+        </div>
+        <figcaption>A single episode of a simple manipulation task. The policy outputs a fresh action at every control step (orange dots on the gripper's path), but success is only observed at step 500. To learn from that one signal, the agent has to work out which of the 500 preceding actions were responsible.</figcaption>
+      </figure>
+
+      <div class="sidenote-wrap">
+        <p>On top of that, LLM RL and robotics RL are solving different-shaped problems. RL for language models has typically been framed as generating <button type="button" class="sidenote-ref" aria-expanded="false" aria-controls="sn-one-response">one response to one prompt</button>, with a reward assigned to that response. Robotics involves generating hundreds to thousands of low-level actions or more for a single task. The reward the policy needs to learn from usually arrives only at the very end indicating task success. On top of that, environments for tasks like language or Go are deterministic and if you generate an action, that action gets played. In robotics, the environment itself can be stochastic, which means even sending the exact same command to the robot twice can produce slightly different behavior. This means the agent has to assign credit to actions taken thousands of steps earlier, across variations in the environment that compound over the horizon.</p>
+        <aside class="sidenote" id="sn-one-response" aria-label="Side note: one response to one prompt">
+          <div class="sidenote-inner">
+            <div class="sidenote-body">
+              <span class="sidenote-label">On &ldquo;one response&rdquo;</span>
+              <p>Though recent agentic tasks/tool use are getting quite a bit longer.</p>
+            </div>
+          </div>
+        </aside>
+      </div>
+
+      <p>The combination of expensive samples and long-horizon structure pushes the field toward value-based RL: methods that learn scoring models (value functions) to assign credit across long horizons. And value-based RL at meaningful scale has been validated far less than the large-scale RL post-training regimes of LLMs.</p>
+
+      <h2 id="value-based-rl">Why can we not use existing value-based RL approaches?</h2>
+
+      <p>Around the same era that PPO, the predominant method for LLM post-training, was developed, a parallel line of value-based methods, for example DDPG, TD3, and SAC, emerged for robotics control, and these have been shown to work on real-world tasks. But applying them directly to frontier robotics models runs into two problems.</p>
+
+      <p>The first is <strong>how these models represent their decisions</strong>. The older algorithms assume the policy draws actions from a Normal distribution: one average action plus some noise around it. That's fine when the right behavior really is one thing with a bit of noise. But modern robotics models are built for situations where there are many types of correct action possibilities. For example, imagine the task of grasping a cup, one can grasp it by the handle or by the base, and both would be correct. To account for this, frontier robotics models use richer machinery like diffusion for action generation (the same method behind image generation that try to generate samples from noise) instead of a simple bell curve. The older RL methods simply weren't built to work for these models.</p>
+
+      <p>The second is <strong>stability</strong>. Deep RL has a well-known tendency for instability, and this is especially the case as models get bigger. Value-based RL methods make this worse in a specific way: instead of learning purely from real outcomes, they partly learn by predicting their own future predictions, and reusing those predictions as if they were ground truth. Small errors in that process compound over time. This stability gets worse when you scale to larger models which correlates with more competent policies, such as billion-parameter VLA policies.</p>
+
+      <div class="sidenote-wrap">
+        <p><button type="button" class="sidenote-ref" aria-expanded="false" aria-controls="sn-prior-work">Several lines of work</button> have tried to use value-based learning with frontier robotics models such as VLAs. One pushes the learning signal back through the model's entire generation process, but tends to be unstable as the signal has to travel through a long chain of denoising steps. The second leaves the model alone entirely, for example generating a handful of candidate actions and executing whichever one the value function scores highest. While safe, they leave performance on the table, since the model itself never actually learns which actions are good and which actions are bad.</p>
+        <aside class="sidenote sidenote--wide" id="sn-prior-work" aria-label="Side note: prior work">
+          <div class="sidenote-inner">
+            <div class="sidenote-body">
+              <span class="sidenote-label">A more technical discussion</span>
+              <p>Expressive policy classes such as diffusion and flow models can capture complex, multi-modal behavior distributions, which has made them attractive for pretraining frontier robotics policies. The central challenge to finetuning them with reinforcement learning is how to improve them using a learned value function. Prior approaches fall broadly into four categories: backpropagating value gradients through the diffusion process, sampling multiple actions and selecting the one with the highest value, guiding the denoising process toward high-value actions, and steering the policy in its noise space.</p>
+              <p>The most direct way to use a <em>Q</em>-function for policy improvement is to backpropagate the <em>Q</em>-value into the policy parameters, as in DDPG-style methods (Fujimoto et al., 2018; Haarnoja et al., 2018). Wang et al. (2022) apply this technique to diffusion policies, but backpropagating through the full denoising chain becomes expensive and can be unstable as the number of denoising steps grows. Ding and Jin (2024) and Park et al. (2025) address this by distilling the multi-step policy into a one- or two-step policy that is trained against the <em>Q</em>-function, trading some expressivity for tractable gradients.</p>
+              <p>A simple, gradient-free alternative is to sample several candidate actions from the policy and choose the one with the highest <em>Q</em>-value. EMaQ (Ghasemipour et al., 2021) does this with a MADE (Germain et al., 2015) behavior model, and SfBC (Chen et al., 2022) generalizes the hard max to a softmax over candidates. IDQL (Hansen-Estruch et al., 2023) and He et al. (2024) pair diffusion policies with this selection rule for online action sampling, but learn the <em>Q</em>-function with an implicit <em>Q</em>-learning objective, so that TD targets do not use policy samples. These methods are stable, but the underlying policy is never itself updated to maximize value, so improvement is limited to the best action the base policy already proposes.</p>
+              <p>Another line of work uses the <em>Q</em>-function to guide intermediate denoising steps toward high-value actions. Psenka et al. (2023) and Fang et al. (2024) use action gradients &nabla;<sub><em>a</em></sub><em>Q</em>(<em>s</em>, <em>a</em>) to directly supervise the denoising steps. These methods often need careful regularization and are prone to instability because it is changing the denoising process itself. A more recent approach keeps the pre-trained diffusion policy frozen and steers it through its input noise. Wagenmaker et al. (2025) learn a policy over the noise to guide the denoising process toward high-reward behaviors. Steering avoids backpropagating through the diffusion model, but it can only reach behaviors the frozen policy can already produce, and exploring in the noise space can require many environment samples.</p>
+            </div>
+          </div>
+        </aside>
+      </div>
+
+      <p>A third option is to learn noise that gets fed into the model that determines downstream action generation. Instead of touching the model's weights, you use RL to search for better noise to feed it. This is appealing because it's low-risk. No matter the noise selected, the result is still an action the model already knows how to produce, so it is harder to get something unreasonable. It also works reasonably well in practice, because searching over noise is a much easier problem than searching over actions directly. But that comes at a cost. You can only ever recombine behaviors the model already has some version of. If the skill a robot needs isn't already somewhere in what the base model learned during pretraining, no amount of noise-searching will produce the action, and both how good the robot ultimately gets, and how quickly it improves, are capped by whatever the original model already knew.</p>
+
+      <p>To go beyond what the model already knows, the learning process needs to update its weights directly in a stable way, so it can use the model's full capacity to represent complex, varied behavior.</p>
+
+      <h2 id="algorithm">What might an algorithm for robotics RL look like?</h2>
+
+      <div class="sidenote-wrap">
+        <p>For an algorithm to post-train frontier robotics models well, the key is to have a stable way to improve large policies that rely on modern generative techniques, such as diffusion, using estimates of how good an action is. <button type="button" class="sidenote-ref" aria-expanded="false" aria-controls="sn-expo">EXPO(-FT)</button> is a system we built based on what we imagined that algorithm might look like, and we tested it on real robots, doing real tasks: routing a string of holiday lights through hooks and plugging it in to light it up, striking a pool ball into a pocket, inserting a flower into the neck of a wine bottle, flipping an egg. Going in, frontier pretrained models could not reliably complete these tasks.</p>
+        <aside class="sidenote" id="sn-expo" aria-label="Side note: EXPO papers">
+          <div class="sidenote-inner">
+            <div class="sidenote-body">
+              <span class="sidenote-label">The EXPO papers</span>
+              <p><a href="https://arxiv.org/abs/2507.07986">EXPO</a>: sample-efficient online reinforcement learning for expressive policies, pairing a base policy trained with imitation and a lightweight edit policy that shifts actions toward higher value.</p>
+              <p><a href="https://arxiv.org/abs/2605.25477">EXPO-FT</a>: a framework for reinforcement learning fine-tuning of pretrained vision-language-action models on real robots using EXPO.</p>
+              <p><a href="https://arxiv.org/abs/2609.18207">Real-Time EXPO-FT</a>: EXPO-FT for real-time execution by decoupling slow pretrained model action generation from fast, reactive editing for fast control and dynamic tasks.</p>
+            </div>
+          </div>
+        </aside>
+      </div>
+
+      <p>EXPO(-FT) works by learning to repeatedly improve actions from the frontier model using reinforcement learning with small edits from a lightweight policy, and then absorbing that into the frontier model itself. To get the best possible action during execution, the robot generates a handful of candidate actions from the frontier model, produces a higher-value edited version of each, and uses the value function to estimate how well each candidate will turn out and pick the best one. Because the edits are deliberately kept small, a nudge can't send the robot to execute something dangerous and all the volatility of RL stays confined to the small model. And because the pretrained model keeps training on the actions that were selected and worked, improvements discovered by the edits get absorbed into the base model itself. This means the model will make better proposals next time, letting the large pretrained model bring its full capacity to bear on learning new behavior.</p>
+
+      <figure>
+        <div class="figure-card qfunc-figure">
+        <svg class="qfunc-svg" viewBox="0 0 640 410" role="img" aria-label="Animation of two modes of a Q-function, with a horizontal key indicating increasing Q value. Base actions sampled near each mode start in a low-value region, and are repeatedly nudged by the edit policy toward the higher-value peak of their own mode.">
+          <rect x="1" y="1" width="638" height="408" rx="2" fill="#fafafa" stroke="#e5e5e5" stroke-width="1"/>
+
+          <defs>
+            <radialGradient id="qHeat" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stop-color="#c2571a" stop-opacity="0.9"/>
+              <stop offset="38%" stop-color="#e8892f" stop-opacity="0.55"/>
+              <stop offset="72%" stop-color="#fbe4d3" stop-opacity="0.3"/>
+              <stop offset="100%" stop-color="#fbe4d3" stop-opacity="0"/>
+            </radialGradient>
+            <linearGradient id="qHeatBar" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#fbe4d3"/>
+              <stop offset="50%" stop-color="#e8892f"/>
+              <stop offset="100%" stop-color="#c2571a"/>
+            </linearGradient>
+            <marker id="qArrowHead" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
+              <path d="M0,0 L10,5 L0,10 z" class="q-arrowhead-path"/>
+            </marker>
+          </defs>
+
+          <!-- Mode A: warm value glow -->
+          <circle cx="250" cy="175" r="130" fill="url(#qHeat)"/>
+          <circle cx="250" cy="175" r="2.5" class="q-peak"/>
+
+          <!-- Mode B: warm value glow -->
+          <circle cx="460" cy="245" r="115" fill="url(#qHeat)"/>
+          <circle cx="460" cy="245" r="2.5" class="q-peak"/>
+
+          <!-- Legend -->
+          <g class="qfunc-legend">
+            <rect x="25.5" y="21.5" width="9" height="9" rx="1.5" transform="rotate(45 30 26)" class="q-base-mark"/>
+            <text x="46" y="30" class="qfunc-legend-text">Pretrained model action</text>
+            <circle cx="290" cy="26" r="7" class="q-dot-legend"/>
+            <text x="304" y="30" class="qfunc-legend-text">Edited action</text>
+          </g>
+
+          <!-- Mode A, sample 1: low-value edge -> near peak -->
+          <g class="edit-pair edit-pair-1">
+            <rect x="124.5" y="81.5" width="9" height="9" rx="1.5" transform="rotate(45 129 86)" class="q-base-mark"/>
+            <line x1="129" y1="86" x2="258" y2="170" class="q-arrow" marker-end="url(#qArrowHead)" style="--len:153.9; stroke-dasharray:153.9;"/>
+            <circle cx="258" cy="170" r="6.5" class="q-dot"/>
+          </g>
+
+          <!-- Mode A, sample 2: low-value edge -> near peak -->
+          <g class="edit-pair edit-pair-2">
+            <rect x="148.5" y="285.5" width="9" height="9" rx="1.5" transform="rotate(45 153 290)" class="q-base-mark"/>
+            <line x1="153" y1="290" x2="230" y2="190" class="q-arrow" marker-end="url(#qArrowHead)" style="--len:126.2; stroke-dasharray:126.2;"/>
+            <circle cx="230" cy="190" r="6.5" class="q-dot"/>
+          </g>
+
+          <!-- Mode B, sample 1: low-value edge -> near peak -->
+          <g class="edit-pair edit-pair-3">
+            <rect x="567.5" y="165.5" width="9" height="9" rx="1.5" transform="rotate(45 572 170)" class="q-base-mark"/>
+            <line x1="572" y1="170" x2="468" y2="230" class="q-arrow" marker-end="url(#qArrowHead)" style="--len:120.1; stroke-dasharray:120.1;"/>
+            <circle cx="468" cy="230" r="6.5" class="q-dot"/>
+          </g>
+
+          <!-- Mode B, sample 2: low-value edge -> near peak -->
+          <g class="edit-pair edit-pair-4">
+            <rect x="365.5" y="335.5" width="9" height="9" rx="1.5" transform="rotate(45 370 340)" class="q-base-mark"/>
+            <line x1="370" y1="340" x2="450" y2="262" class="q-arrow" marker-end="url(#qArrowHead)" style="--len:111.7; stroke-dasharray:111.7;"/>
+            <circle cx="450" cy="262" r="6.5" class="q-dot"/>
+          </g>
+
+          <!-- Horizontal Q-value key -->
+          <g class="qfunc-key">
+            <rect x="190" y="372" width="260" height="14" rx="7" fill="url(#qHeatBar)"/>
+            <text x="320" y="399" text-anchor="middle" class="qfunc-key-label">Higher value action &#8594;</text>
+          </g>
+        </svg>
+        </div>
+        <figcaption>The edit policy proposes small, bounded adjustments to the base model's actions, nudging each one from a low-value region toward the higher-value peak of its own mode (orange dots), without ever straying far from what the base model already knows how to do.</figcaption>
+      </figure>
+
+      <p>Throughout online learning, a human supervises the robot and can intervene whenever it starts to go wrong. Those interventions are fed back into training to improve the policy further.</p>
+
+      <p>Across six complex manipulation tasks, such as routing string lights, sinking a pool shot, and inserting a flower into a bottle, EXPO-FT reaches 30/30 success using an average of only 19 minutes of online interaction.</p>
+
+      <div class="video-grid">
+        <figure class="video-card">
+          <video autoplay muted loop playsinline preload="metadata">
+            <source src="../figures/blog/post_training/ball_balance.mp4" type="video/mp4">
+          </video>
+          <figcaption>Ball Balancing</figcaption>
+        </figure>
+        <figure class="video-card">
+          <video autoplay muted loop playsinline preload="metadata">
+            <source src="../figures/blog/post_training/soccer_kick.mp4" type="video/mp4">
+          </video>
+          <figcaption>Soccer Kicking</figcaption>
+        </figure>
+        <figure class="video-card">
+          <video autoplay muted loop playsinline preload="metadata">
+            <source src="../figures/blog/post_training/pool.mp4" type="video/mp4">
+          </video>
+          <figcaption>Pool Shot</figcaption>
+        </figure>
+        <figure class="video-card">
+          <video autoplay muted loop playsinline preload="metadata">
+            <source src="../figures/blog/post_training/light.mp4" type="video/mp4">
+          </video>
+          <figcaption>String Light Routing</figcaption>
+        </figure>
+      </div>
+
+      <figure>
+        <div class="figure-card bars-figure">
+        <svg class="bars-svg" viewBox="0 0 640 318" role="img" aria-label="Animated bar chart of average success rate out of 30 trials. SFT on π0.5 18.8, HG-DAgger 20.5, DSRL 19, HIL-SERL 5.5, EXPO-FT 30. Bars grow from zero to their final value on a loop.">
+          <rect x="1" y="1" width="638" height="316" rx="2" fill="#fafafa" stroke="#e5e5e5" stroke-width="1"/>
+
+          <text x="26" y="34" class="bars-title">Average success rate</text>
+          <text x="26" y="52" class="bars-subtitle">out of 30 trials, across six manipulation tasks</text>
+
+          <line x1="26" y1="270" x2="614" y2="270" class="bars-baseline"/>
+
+          <!-- Bars: baseline y=270; rects sit at final size, animation scales from the baseline -->
+          <g class="bar-group bar-1">
+            <rect class="bar-rect bar-baseline" x="84" y="138.4" width="24" height="131.6" rx="5"/>
+            <text class="bar-value" x="96" y="126.4">18.8</text>
+          </g>
+          <g class="bar-group bar-2">
+            <rect class="bar-rect bar-baseline" x="196" y="126.5" width="24" height="143.5" rx="5"/>
+            <text class="bar-value" x="208" y="114.5">20.5</text>
+          </g>
+          <g class="bar-group bar-3">
+            <rect class="bar-rect bar-baseline" x="308" y="137" width="24" height="133" rx="5"/>
+            <text class="bar-value" x="320" y="125">19</text>
+          </g>
+          <g class="bar-group bar-4">
+            <rect class="bar-rect bar-baseline" x="420" y="231.5" width="24" height="38.5" rx="5"/>
+            <text class="bar-value" x="432" y="219.5">5.5</text>
+          </g>
+          <g class="bar-group bar-5">
+            <rect class="bar-rect bar-featured" x="532" y="60" width="24" height="210" rx="5"/>
+            <circle class="bar-peak" cx="544" cy="60" r="5"/>
+            <text class="bar-value bar-value-featured" x="544" y="44">30</text>
+          </g>
+
+          <!-- Category labels -->
+          <g class="bars-cat-label">
+            <text x="96" y="292" text-anchor="middle">SFT on π0.5</text>
+            <text x="208" y="292" text-anchor="middle">HG-DAgger</text>
+            <text x="320" y="292" text-anchor="middle">DSRL</text>
+            <text x="432" y="292" text-anchor="middle">HIL-SERL</text>
+            <text x="544" y="292" text-anchor="middle">EXPO-FT</text>
+          </g>
+        </svg>
+        </div>
+        <figcaption>Average success rate across tasks: EXPO-FT reaches 30/30, compared with SFT, HG-DAgger, DSRL, and HIL-SERL.</figcaption>
+      </figure>
+
+      <p>Practically, this means a frontier model can be deployed on tasks like these and then post-trained to high reliability in a matter of tens of minutes.</p>
+
+      <p><strong>What does this not solve?</strong> EXPO-FT is our attempt at the first of the two things we said a recipe needs, and it can inform what the rest of the work needed might look like.</p>
+
+      <p>First, <strong>a human is in the loop to a large extent.</strong> Someone defines success, resets the scene, and intervenes when the robot goes wrong. That doesn't mean it cannot scale. Something like Waymo, for example, can run using remote operators with one person who can oversee many vehicles at once. The robot can perform learning autonomously, but going from one robot and one operator to a large fleet depends on how much human attention each additional robot demands. This is part of the second half of the recipe, the protocol, and there are a lot of questions that remain.</p>
+
+      <p>Second, <strong>longer horizons strain the value function.</strong> EXPO-FT is safe because it never moves far from the base model in any single step, but that safety property is only as good as the value estimates behind it. Longer horizons make credit assignments harder and push training times up. Assigning credit across thousands of steps or more with reward arriving only at the end is the goal, and we tested the shorter-horizoned end of it.</p>
+
+      <p>Finally, the <strong>computational cost can be high.</strong> Nineteen minutes of robot interaction is not nineteen minutes of post-training. Gradient updates on a model this large dominate wall-clock time, and closing that gap matters for post-training to become a routine.</p>
+
+      <p>We think EXPO-FT shows that stable RL post-training on a frontier robotics policy is achievable. Turning that into something a team can pick up and expect to work on their own robot and their own task requires standardized training protocols, as in the case for LLMs.</p>
+
+      <h2 id="protocols">Standard training protocols</h2>
+
+      <p>Even with the best algorithm, post-training only becomes a complete recipe with a standard set of protocols around it: how a task counts as successful, how resets are done, how humans provide input, how to tune hyperparameters, and how to initialize the task and policy.</p>
+
+      <p><strong>Reward specification.</strong> Reinforcement learning works by optimizing rewards, and different rewards produce vastly different outcomes even for the same task. In LLM RL, reinforcement learning from verifiable rewards (RLVR) gave the field a default answer: check the answer, check the tests. Robotics has no equivalent. Today, success detectors are either hand-built per task or replaced by a human watching each trajectory and calling it, neither of which scales. Learned success classifiers and reward models are all plausible directions to explore.</p>
+
+      <p><strong>Resets.</strong> Between episodes, the robot needs to be reset, and today that is usually a person's job. Open questions remain both on what states to reset to and on how to get there without a human, for example via a learned reset policy or reversible task design. Perhaps for real deployment, a reset is not even needed and instead moving onto the next task without undoing the previous is the better alternative. Determining which of those choices are the best matters for a universal recipe.</p>
+
+      <p><strong>Human in the loop.</strong> Human interventions have proven to be a useful tool for improving data efficiency. How much to provide, when to provide it, and how that signal gets used during training are open questions with direct implications for how any of this scales past one robot and one operator.</p>
+
+      <p><strong>Hyperparameter tuning.</strong> Value-based RL is known to be sensitive to hyperparameters. Learning rate, the update-to-data ratio, when to stop training, the task horizon, and the control frequency at which the policy acts all shape how stable and sample-efficient fine-tuning turns out to be, and none of them has a well-understood default in this setting the way they do for supervised learning.</p>
+
+      <p><strong>Initialization.</strong> How the task and policy are initialized can play a large part in how performance turns out. How much data to initialize from, what that initial dataset should contain, and how heavily to weigh it against newly collected online experience are all still open questions that already have answers in language modeling, but not yet in robotics.</p>
+
+      <p>None of these has a default answer yet, and the right answer may also depend on the algorithm. We&rsquo;ve created a set of <a href="expo-tuning.html">reference tuning tips</a> as a step towards this direction for EXPO-FT, but that does not completely address these problems. We think they are among the most consequential open problems in the field. They are also the kind of problem that gets solved through community effort, by converging on shared answers.</p>
+
+      <h2 id="towards-universal">Towards universal post-training</h2>
+
+      <p>Language model post-training became scalable because the field settled on defaults concrete enough to follow and be expected to work. Robotics is arriving at the same moment: the models are large, general, and pretrained, and people are trying to make them deployable; and robotics deployment needs to be even more reliable than language models, because robots acting autonomously in the world can't be reviewed the way we review writing from LLMs.</p>
+
+      <p>This is exactly when a standardized recipe matters most. Pretraining gave robotics models that know how to do almost anything at once. Post-training is how they learn to do things reliably every time. We believe it is what will bring frontier robotics to where LLMs are today and beyond, and converging on a set of industry defaults, <strong>a universal post-training recipe</strong>, is the most important part of bringing us to that point.</p>
+
+      <h2 id="acknowledgements" class="post-subheading">Acknowledgements</h2>
+
+      <p>Thanks to Anikait Singh, Aneesh Muppidi, Dion Dong, and Jules Qiu for helpful discussions and feedback on this post.</p>
+
+      <div class="post-author-card">
+        <img src="../perrydong.jpg" alt="Perry Dong" class="post-author-avatar">
+        <div>
+          <p class="post-author-name">Perry Dong</p>
+          <p class="post-author-bio">PhD student in Computer Science at Stanford University, working on reinforcement learning.<br><a href="../index.html">More about Perry</a> <a href="../blog.html">More posts</a></p>
+        </div>
+      </div>
+    </article>
+  </main>
+
+  <footer>
+    <p>© 2026 Perry Dong.</p>
+  </footer>
+
+</div>
+
+<script src="../script.js"></script>
+<script src="selfplay-figure.js"></script>
+<script src="horizon-figure.js"></script>
+</body>
+</html>

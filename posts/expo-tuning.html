@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EXPO Hyperparameter Tuning Guide — Perry Dong</title>
+<meta name="description" content="A practical guide to tuning EXPO, EXPO-FT, and Real-Time EXPO-FT: edit action scale, number of action samples, prior quality, and troubleshooting jitter. By Perry Dong, PhD student in Computer Science at Stanford University.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../style.css">
+<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+</head>
+<body>
+
+<div class="reading-progress" id="reading-progress"></div>
+
+<button id="theme-toggle" aria-label="Toggle dark mode" title="Toggle dark mode">
+  <svg id="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+  <svg id="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z"/></svg>
+</button>
+
+<button id="back-to-top" aria-label="Back to top" title="Back to top">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+</button>
+
+<div class="wrap">
+
+  <main>
+    <article class="post-page">
+      <a href="../blog.html" class="back-link">&larr; Back to blog</a>
+      <h1 class="post-title">EXPO Hyperparameter Tuning Guide</h1>
+
+      <div class="post-meta">
+        <div class="post-meta-authors">
+          <a class="post-meta-author" href="../index.html">
+            <img src="../perrydong.jpg" alt="Perry Dong" class="post-meta-avatar">
+            <span class="post-meta-name">Perry Dong</span>
+          </a>
+        </div>
+        <p class="post-date">September 2026 <span class="post-readtime">3 min read</span></p>
+      </div>
+
+      <nav class="post-toc" aria-label="Table of contents">
+        <p class="post-toc-title">In this post</p>
+        <ol>
+          <li><a href="#hyperparameter-tuning">Hyperparameter tuning</a></li>
+          <li><a href="#jitter">Troubleshooting: the robot is jittery</a></li>
+        </ol>
+      </nav>
+
+      <div class="sidenote-wrap">
+        <p>This guide applies to the <button type="button" class="sidenote-ref" aria-expanded="false" aria-controls="sn-expo">EXPO papers</button>.</p>
+        <aside class="sidenote sidenote--wide" id="sn-expo" aria-label="Side note: EXPO papers">
+          <div class="sidenote-inner">
+            <div class="sidenote-body">
+              <span class="sidenote-label">The EXPO papers</span>
+              <p><a href="https://arxiv.org/abs/2507.07986">EXPO</a>: sample-efficient online reinforcement learning for expressive policies, pairing a base policy trained with imitation and a lightweight edit policy that shifts actions toward higher value.</p>
+              <p><a href="https://arxiv.org/abs/2605.25477">EXPO-FT</a>: a framework for reinforcement learning fine-tuning of pretrained vision-language-action models on real robots using EXPO.</p>
+              <p><a href="https://arxiv.org/abs/2609.18207">Real-Time EXPO-FT</a>: EXPO-FT for real-time execution by decoupling slow pretrained model action generation from fast, reactive editing for fast control and dynamic tasks.</p>
+            </div>
+          </div>
+        </aside>
+      </div>
+
+      <h2 id="hyperparameter-tuning">Hyperparameter tuning</h2>
+
+      <h3 id="edit-action-scale">Edit action scale</h3>
+
+      <p>The most important hyperparameter of EXPO is the <strong>edit action scale</strong>, which controls how much the edit policy can deviate from the base policy distribution to maximize value. Tasks where improvement is more like small refinement will benefit from a small edit scale. Tasks where improvement requires more exploration, for example if the prior isn&rsquo;t as good, will require larger action scales.</p>
+
+      <p>Good starting values are:</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Regime</th><th>When to use</th><th>Values to try</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Small action scale</td><td>Improvement is small refinement</td><td>0.01, <strong>0.05</strong>, <strong>0.1</strong>, 0.15</td></tr>
+            <tr><td>Large action scale</td><td>Improvement requires more exploration</td><td>0.4, <strong>0.5</strong>, 0.6, 0.7</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3 id="action-samples">Number of action samples (N)</h3>
+
+      <p>Performance is generally insensitive to the number of action samples <em>N</em>. A default of <strong><em>N</em> = 8</strong> works well across tasks, but increasing the dimension of the actions, i.e. with action chunking, can require a larger number of action samples such as 16, 32, or 64. Real-Time EXPO-FT benefits from a larger number of action samples to account for reactivity.</p>
+
+      <h3 id="prior-quality">Prior quality</h3>
+
+      <p>EXPO benefits from having a strong prior. The prior can take many forms &mdash; a pretrained policy, offline data, human interventions, or a combination of these &mdash; as long as it contains information on behaviors.</p>
+
+      <p>There&rsquo;s no definitive metric for how good a prior is, especially since it may take different forms (e.g., offline data vs. a pretrained policy), but it can be proxied by asking:</p>
+
+      <blockquote>
+        <p>If I combine all of this information into a policy, i.e. by training a policy on the offline data, how good is the resulting success rate?</p>
+      </blockquote>
+
+      <p>Starting with a prior of <strong>~50% success or above</strong> is generally helpful for learning.</p>
+
+      <h2 id="jitter">Troubleshooting: the robot is jittery</h2>
+
+      <p>There should be no noticeable jitter during RL training or policy execution. If you&rsquo;re encountering jitter, check these possible causes:</p>
+
+      <p><strong>Controller settings.</strong> Controller parameter modifications can introduce jitter. The default DROID controller is used for the EXPO-FT experiments, which does not apply action smoothing or interpolation but does enforce velocity limits. It&rsquo;s perfectly fine to use a different controller, provided it can execute without jitter.</p>
+
+      <p><strong>Inference latency.</strong> Model inference time exceeding the control timestep will prevent the system from sustaining VLA inference. The default in EXPO-FT is 10 Hz with 2 H200s. Inference can be made faster with more compute. Real-Time EXPO-FT also handles this.</p>
+
+      <p><strong>Incorrect action normalization or scaling.</strong> Normalization not done correctly, or mismatched normalization stats between training and inference, can cause jitter.</p>
+
+      <div class="post-author-card">
+        <img src="../perrydong.jpg" alt="Perry Dong" class="post-author-avatar">
+        <div>
+          <p class="post-author-name">Perry Dong</p>
+          <p class="post-author-bio">PhD student in Computer Science at Stanford University, working on reinforcement learning.<br><a href="../index.html">More about Perry</a> <a href="../blog.html">More posts</a></p>
+        </div>
+      </div>
+    </article>
+  </main>
+
+  <footer>
+    <p>© 2026 Perry Dong.</p>
+  </footer>
+
+</div>
+
+<script src="../script.js"></script>
+</body>
+</html>
